@@ -4,20 +4,186 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Home</title>
+    <style>
+      body {
+        min-height: 100vh;
+        display: flex;
+        font-family: sans-serif;
+        background-color: #f4f4f4;
+        margin: 0 30px;
+        & > div {
+          width: 50%;
+          padding: 20px;
+          margin: auto;
+        }
+      }
+
+      .result {
+        height: 80vh;
+        overflow: scroll;
+        background: #fff;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+        & div {
+          display: flex;
+          flex-direction: column;
+          & span:first-child {
+            font-weight: bold;
+            margin-bottom: 10px;
+          }
+        }
+      }
+
+      h1 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      ul {
+        justify-content: center;
+        gap: 10px;
+        display: flex;
+        list-style: none;
+        padding: 0;
+        text-align: center;
+      }
+
+      li {
+        margin-bottom: 10px;
+      }
+
+      a {
+        display: block;
+        text-decoration: none;
+        background-color: #278fff;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+      }
+
+      a:hover {
+        background-color: #278fff;
+      }
+
+      form {
+        width: 300px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      input[type="text"],
+      textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+
+      textarea {
+        resize: vertical;
+      }
+
+      button[type="submit"] {
+        font-size: 1rem;
+        background-color: #0f45e8;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+    </style>
   </head>
   <body>
-    <h1>Happy animals</h1>
-    <ul>
-      <li>
-        <a href="/view-image?filename=veryhappydog.jpg">Check a happy dog</a>
-      </li>
-      <li>
-        <a href="/view-image?filename=veryhappycat.jpg">Check a happy cat</a>
-      </li>
-    </ul>
     <div>
-      <button id="getButton">Get data</button>
-      <div id="result"></div>
+      <h1>Happy animals</h1>
+      <ul>
+        <li>
+          <a href="/view-image?filename=veryhappydog.jpg">Check a happy dog</a>
+        </li>
+        <li>
+          <a href="/view-image?filename=veryhappycat.jpg">Check a happy cat</a>
+        </li>
+      </ul>
+      <form id="postForm">
+        <input type="text" id="name" placeholder="name" required />
+        <textarea type="text" id="text" placeholder="msg" required></textarea>
+        <button type="submit">Submit</button>
+      </form>
     </div>
+    <div id="result" class="result"></div>
   </body>
 </html>
+
+<script>
+  const resultDiv = document.getElementById("result");
+
+  function getData() {
+    fetch("/api/data")
+      .then((response) => response.json())
+      .then((data) => {
+        showData(data);
+      })
+      .catch((error) => {
+        resultDiv.textContent = "Error occurred.";
+      });
+  }
+
+  function postData(name, text) {
+    fetch("/api/data", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ text, name }),
+    })
+      .then((response) => response.json())
+      .then(() => {
+        getData();
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        resultDiv.textContent = "Error occurred.";
+      });
+  }
+
+  function showData(data) {
+    const stringData = JSON.stringify(data);
+    resultDiv.textContent = "";
+    for (let i = 0; i < data.length; i++) {
+      const contentDiv = document.createElement("div");
+      const nameDiv = document.createElement("span");
+      const msgDiv = document.createElement("span");
+      nameDiv.textContent = data[i].name;
+      msgDiv.textContent = data[i].text;
+
+      contentDiv.appendChild(nameDiv);
+      contentDiv.appendChild(msgDiv);
+      resultDiv.appendChild(contentDiv);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    getData();
+  });
+
+  const postForm = document.getElementById("postForm");
+  postForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const name = document.getElementById("name").value;
+    const text = document.getElementById("text").value;
+
+    postData(name, text);
+    getData();
+  });
+</script>

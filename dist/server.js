@@ -12,6 +12,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const filepath = path_1.default.join(__dirname, "../");
 const publicPath = path_1.default.join(filepath, "public");
+const dataFilePath = path_1.default.join(filepath, "data/data.json");
 const server = http_1.default.createServer((req, res) => {
     const { method } = req;
     const parsedUrl = url_1.default.parse(req.url || "", true);
@@ -47,7 +48,6 @@ const server = http_1.default.createServer((req, res) => {
         }
         else {
             const file = path_1.default.join(publicPath, "images/", filename);
-            const content = fs_1.default.readFileSync(file);
             fs_1.default.readFile(file, (err, data) => {
                 if (err) {
                     res.writeHead(404, { "Content-Type": "text/plain" });
@@ -55,13 +55,57 @@ const server = http_1.default.createServer((req, res) => {
                 }
                 else {
                     res.writeHead(200, { "Content-Type": "image/jpg" });
-                    res.end(content);
+                    res.end(data);
                 }
             });
         }
     }
-    //   if (pathname === "/api/data" && method === "GET") {
-    //   }
+    // GET /api/data
+    if (pathname === "/api/data" && method === "GET") {
+        fs_1.default.readFile(dataFilePath, (err, data) => {
+            if (err) {
+                res.writeHead(404, { "Content-Type": "text/plain" });
+                res.end(JSON.stringify({ message: "No data found" }));
+            }
+            else {
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.end(data);
+            }
+        });
+    }
+    // POST /api/data
+    if (pathname === "/api/data" && method === "POST") {
+        let errorMsg = "";
+        let body = "";
+        req.on("data", (chunk) => {
+            body += chunk.toString();
+        });
+        req.on("end", () => {
+            try {
+                const data = JSON.parse(body);
+                const existingData = JSON.parse(fs_1.default.readFileSync(dataFilePath, "utf8"));
+                console.log("Received data:", data);
+                try {
+                    existingData.push(data);
+                    fs_1.default.writeFileSync(dataFilePath, JSON.stringify(existingData, null, 2));
+                    console.log("Data saved successfully");
+                    res.writeHead(200, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ message: "Data received successfully", receivedData: data }));
+                    return;
+                }
+                catch (error) {
+                    console.error("Error saving data:", error);
+                    errorMsg = "Error saving data";
+                }
+            }
+            catch (error) {
+                console.error("Error parsing JSON:", error);
+                errorMsg = "Invalid JSON";
+            }
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: errorMsg }));
+        });
+    }
 });
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
