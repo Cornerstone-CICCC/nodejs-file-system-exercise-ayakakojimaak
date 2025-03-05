@@ -1,0 +1,30 @@
+{
+  "name": "nodejs-file-system-exercise",
+  "version": "1.0.0",
+  "description": "[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/1zz6B_fO) # NodeJS - File System Exercise",
+  "homepage": "https://github.com/Cornerstone-CICCC/nodejs-file-system-exercise-ayakakojimaak#readme",
+  "bugs": {
+    "url": "https://github.com/Cornerstone-CICCC/nodejs-file-system-exercise-ayakakojimaak/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cornerstone-CICCC/nodejs-file-system-exercise-ayakakojimaak.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon dist/server.js\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.9",
+    "concurrently": "^9.1.2",
+    "nodemon": "^3.1.9",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  }
+}
