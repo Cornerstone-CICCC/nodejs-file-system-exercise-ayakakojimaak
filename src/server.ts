@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const filepath = path.join(__dirname, "../");
+const publicPath = path.join(filepath, "public");
 
 const server = http.createServer((req, res) => {
   const { method } = req;
@@ -19,6 +20,20 @@ const server = http.createServer((req, res) => {
   // pathname "/users"
 
   if (pathname === "/" && method === "GET") {
+    const file = path.join(publicPath, "index.html");
+    fs.readFile(file, (err, data) => {
+      if (err) {
+        res.writeHead(500, { "Content-Type": "text/plain" });
+        res.end("Internal Server Error");
+      } else {
+        res.writeHead(200, { "Content-Type": "text/html" });
+        res.end(data);
+      }
+    });
+    return;
+  }
+
+  if (pathname === "/hello" && method === "GET") {
     res.writeHead(200, { "Content-Type": "text/html" });
     res.end("Hello World");
   }
@@ -29,12 +44,23 @@ const server = http.createServer((req, res) => {
       res.writeHead(400, { "Content-Type": "text/html" });
       res.end("Filename is required");
     } else {
-      const file = path.join(filepath, "dist/images/", filename);
+      const file = path.join(publicPath, "images/", filename);
       const content = fs.readFileSync(file);
-      res.writeHead(200, { "Content-Type": "image/jpg" });
-      res.end(content);
+      fs.readFile(file, (err, data) => {
+        if (err) {
+          res.writeHead(404, { "Content-Type": "text/plain" });
+          res.end("File not found");
+        } else {
+          res.writeHead(200, { "Content-Type": "image/jpg" });
+          res.end(content);
+        }
+      });
     }
   }
+
+  //   if (pathname === "/api/data" && method === "GET") {
+
+  //   }
 });
 
 const PORT = process.env.PORT || 3000;
